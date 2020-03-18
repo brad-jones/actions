@@ -1,0 +1,5 @@
+packages:
+  - "."
+  - "./cancel-redundant"
+  - "./search-replace-file"
+  - "./setup-dart"
