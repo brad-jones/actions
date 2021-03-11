@@ -3,7 +3,7 @@ import * as github from "@actions/github";
 
 (async function main(argv: string[]): Promise<void> {
 	// Create a new instance of the Github REST client
-	const octokit = new github.GitHub(core.getInput("token"));
+	const octokit = github.getOctokit(core.getInput("token"));
 
 	// Bail out early if it's not a push or a pr
 	const event = process.env["GITHUB_EVENT_NAME"];
@@ -59,16 +59,17 @@ import * as github from "@actions/github";
 
 	// Find all workflow runs that can be canceled
 	for (const status of ["queued", "in_progress"]) {
-		const listRuns = octokit.actions.listWorkflowRuns.endpoint.merge({
-			owner,
-			repo,
-			workflow_id: workFlowId,
-			status,
-			branch,
-			event,
-		});
-
-		for await (const item of octokit.paginate.iterator(listRuns)) {
+		for await (const item of octokit.paginate.iterator(
+			octokit.actions.listWorkflowRuns,
+			{
+				owner,
+				repo,
+				workflow_id: workFlowId,
+				status: status as any,
+				branch,
+				event,
+			}
+		)) {
 			// There is some sort of bug where the pagination URLs point to a
 			// different endpoint URL which trips up the resulting representation
 			// In that case, fallback to the actual REST 'workflow_runs' property
@@ -83,14 +84,12 @@ import * as github from "@actions/github";
 					continue;
 				}
 				try {
-					const reply = await octokit.actions.cancelWorkflowRun({
+					await octokit.actions.cancelWorkflowRun({
 						owner,
 						repo,
 						run_id: run.id,
 					});
-					core.info(
-						`Previous run (id ${run.id}) cancelled, status = ${reply.status}`
-					);
+					core.info(`Previous run (id ${run.id}) cancelled`);
 				} catch (error) {
 					core.info(
 						`[warn] Could not cancel run (id ${run.id}): [${error.status}] ${error.message}`
@@ -103,7 +102,7 @@ import * as github from "@actions/github";
 	.then(() => {
 		process.exit(0);
 	})
-	.catch(e => {
+	.catch((e) => {
 		if (e["message"] !== undefined) {
 			core.setFailed(e.message);
 		}

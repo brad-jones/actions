@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import replaceInFile from "replace-in-file";
+import { replaceInFile } from "replace-in-file";
 
 (async function main(argv: string[]): Promise<void> {
 	const from = core.getInput("from", { required: true });
@@ -14,7 +14,7 @@ import replaceInFile from "replace-in-file";
 	.then(() => {
 		process.exit(0);
 	})
-	.catch(e => {
+	.catch((e) => {
 		if (e["message"] !== undefined) {
 			core.setFailed(e.message);
 		}
