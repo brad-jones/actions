@@ -1,0 +1,19 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+  # Pointless unless we switch back to using regular old npm
+  # https://github.com/dependabot/dependabot-core/issues/1736
+  #- package-ecosystem: "npm"
+  #  directory: "/"
+  #  schedule:
+  #    interval: "daily"
+  #  commit-message:
+  #    prefix: "build"
+  #    include: "scope"

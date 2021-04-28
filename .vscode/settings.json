@@ -26,6 +26,7 @@
 		"Builtins",
 		"commitlint",
 		"dartlang",
+		"dependabot",
 		"macos",
 		"octokit",
 		"onwarn",
@@ -33,6 +34,7 @@
 		"pnpx",
 		"rpms",
 		"treeshake",
-		"tslib"
+		"tslib",
+		"xargs"
 	]
 }

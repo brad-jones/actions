@@ -1,4 +1,8 @@
-on: [push, pull_request]
+on:
+  pull_request_target:
+  push:
+    branches-ignore:
+      - "dependabot/**"
 
 env:
   CI: true
@@ -8,26 +12,65 @@ jobs:
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.4
       - uses: ./cancel-redundant
         with:
           token: ${{ secrets.CANCEL_GITHUB_TOKEN }}
 
+  # TODO: Get some tests running here
+  # I guess we have already tested "cancel-redundant" above, I guess we just
+  # execute the other actions as well? Gotta be careful of the whole pull_request
+  # / pull_request_target vulnerabilities...
+  # test:
+  #   needs: init
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Get Git SHA
+  #       id: gitRef
+  #       run: |
+  #         if [ "${{ github.event_name }}" == 'pull_request_target' ]; then
+  #           echo "::set-output name=sha::${{ github.event.pull_request.head.sha }}"
+  #         else
+  #           echo "::set-output name=sha::${{ github.sha }}"
+  #         fi
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2.3.4
+  #       with:
+  #         ref: ${{ steps.gitRef.outputs.sha }}
+  #     - name: Read .node-version
+  #       run: echo ::set-output name=NODE_VERSION::$(cat .node-version | xargs)
+  #       id: nvm
+  #     - uses: actions/setup-node@v2.1.5
+  #       with:
+  #         node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
+  #     - uses: pnpm/action-setup@v2.0.1
+  #     - name: Restore node cache
+  #       uses: actions/cache@v2.1.5
+  #       with:
+  #         path: ~/.pnpm-store
+  #         key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+  #         restore-keys: ${{ runner.os }}-node-
+
   release:
+    if: "! contains(github.event_name, 'pull_request')"
     needs: init
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v2.3.4
+      - name: Read .node-version
+        run: echo ::set-output name=NODE_VERSION::$(cat .node-version | xargs)
+        id: nvm
+      - uses: actions/setup-node@v2.1.5
         with:
-          node-version: "14.x"
-      - run: npm add -g pnpm
-      - uses: actions/cache@v2
+          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
+      - uses: pnpm/action-setup@v2.0.1
+      - name: Restore node cache
+        uses: actions/cache@v2.1.5
         with:
           path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-
+          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-
       - run: pnpm install
       - run: pnpx semantic-release
