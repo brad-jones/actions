@@ -40,7 +40,7 @@ jobs:
   #     - name: Read .node-version
   #       run: echo ::set-output name=NODE_VERSION::$(cat .node-version | xargs)
   #       id: nvm
-  #     - uses: actions/setup-node@v2.4.1
+  #     - uses: actions/setup-node@v3.5.0
   #       with:
   #         node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
   #     - uses: pnpm/action-setup@v2.0.1
@@ -62,7 +62,7 @@ jobs:
       - name: Read .node-version
         run: echo ::set-output name=NODE_VERSION::$(cat .node-version | xargs)
         id: nvm
-      - uses: actions/setup-node@v2.4.1
+      - uses: actions/setup-node@v3.5.0
         with:
           node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
       - uses: pnpm/action-setup@v2.0.1
