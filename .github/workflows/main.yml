@@ -12,7 +12,7 @@ jobs:
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v3.3.0
       - uses: ./cancel-redundant
         with:
           token: ${{ secrets.CANCEL_GITHUB_TOKEN }}
@@ -34,7 +34,7 @@ jobs:
   #           echo "::set-output name=sha::${{ github.sha }}"
   #         fi
   #     - name: Checkout code
-  #       uses: actions/checkout@v2.3.5
+  #       uses: actions/checkout@v3.3.0
   #       with:
   #         ref: ${{ steps.gitRef.outputs.sha }}
   #     - name: Read .node-version
@@ -58,7 +58,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v3.3.0
       - name: Read .node-version
         run: echo ::set-output name=NODE_VERSION::$(cat .node-version | xargs)
         id: nvm
